@@ -128,12 +128,17 @@
 \renewcommand{\arraystretch}{1.2}
 \setlength{\droptitle}{-2cm}
 
-\title{Distributed Welfare Games with Player Constraints and Target Thresholds}
+\title{Distributed Target Threshold Assignment with Agent Constraints}
 \author{Anshul Kanakia}
 \date{}
 
 \begin{document}
 \maketitle
+
+\begin{abstract}
+Target assignment is a well studied problem in the fields of game theory and optimization where a number of agents are assigned to a number of targets for maximum system welfare. For example, given a set of search/surveillance zones and a swarm of UAVs, this problem describes how the UAVs should be delegated to search zones so as to maximize some global welfare for the system. An extension of this problem is where each search zone require a minimum number of agents to be assigned to it to receive any payoff whatsoever. Another natural extension arises when certain agents cannot be assigned to specific search areas for a number of reasons such as fuel constraints, obstacles, environmental hazards, etc. We look at both these extensions and frame the problem of target threshold assignment with agent constraints as a communal welfare game and discuss distributed solutions to this problem.
+\end{abstract}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 I inspect the cooperative, distributed welfare game of vehicle-target assignment with welfare functions that are not sub-modular, but are instead based on target specific threshold values and player-target assignment constraints. Target threshold values define individual agent payoffs depending on the size of the group.
@@ -151,7 +156,7 @@ Since target thresholds remove the submodularity property from welfare functions
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Game Setup}
+\section{Game Setup and Example}
 The cooperative game is set up as follows:
 \begin{itemize}
 	\item Players: $\Pl = \{1,2,3,\ldots, N\}$.
@@ -177,8 +182,7 @@ We can clearly see that the welfare function, $W(|a|_t)$, is not submodular. The
 \textbf{Definition:} A target is considered ``successfully assigned'' when $|a|_t \geq k_t$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.
 
 \textbf{Definition:} A target is considered ``perfectly assigned'' when $|a|_t = k_t$.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{An Example}
+
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
 \begin{itemize}
 	\item Players: $\Pl = \{1,2,3,4\}$
@@ -245,12 +249,15 @@ Global welfare values for this example are listed in Table \ref{tab:mcgw}. Note 
 	\centering\caption{Global welfare for the vehicle-target assignemt example scenario with target thresholds and player constraints.}\label{tab:mcgw}
 \end{table}
 
+\section{Possible Scenarios}
+\subsection{Case I: True target thresholds are known to all agents}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Selecting Utility Functions}
+\section{Selecting Utility Functions}
 We discuss the effects that choosing different utility functions has for this example scenario. We discuss two utility functions, marginal contribution and Shapley value utility, and apply log-linear learning to observe equilibria of the system under both utility design choices.
 
-\subsubsection{Marginal Contribution (MC) Utility}
+\subsection{Marginal Contribution (MC) Utility}
 MC utility gives us two important and desirable properties for a good utility function, existence and efficiency of NE. NE existence is guaranteed because the chosen binary welfare function is anonymous and  depends only on the number of vehicles assigned to a target\cite{Monderer1996}. Given that the global objective function is just a counting function that counts the total number of successfully assigned targets, we can show that a maximum assignment is always an NE of the system as it results in maximum player payoffs (see proof in \textbf{Price of Stability} section). Player utility values using MC utility are listed in Table \ref{tab:mcUtil}.  
 
 \begin{table}[!htb]
@@ -361,7 +368,7 @@ Averaging over 1000 runs of log-linear learning for 1000 iterations each and usi
 
 As is evident from these results, applying log-linear learning using MC utility converges the system to perfect target assignment if a perfect assignment can be made. The NE in blue are all cases of perfect assignment while the equilibria in red are cases of successful assignment but do not maximize global welfare. We now look at what happens when Shapley value utility is used instead of MC for this game.
 
-\subsubsection{Shapley Value (SV) Utility}
+\subsection{Shapley Value (SV) Utility}
 Using SV utility, each player's utility for selecting target, $t \in \Ta$, can be computed using the simplified equation,
 \begin{align}
 	U_i(t, a_{-i}) & = \left\{
@@ -479,9 +486,9 @@ In this case, the worst NE has the highest likelihood of being chosen by log-lin
 
 In this example case it is clearly a better idea to use MC over SV when picking an appropriate utility function for this system to do optimal target assignment.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Price of Anarchy}
+\section{Price of Anarchy/Price of Stability Analysis}
+\subsection{Price of Anarchy (PoA)}
 PoA for this game is only defined under specific conditions for this vehicle-target assignment problem. The global welfare for the worst NE of the game can be $W_{NE}^{bad} = 0$, e.g. $|\Pl| = 3$, $|\Ta| = 3$, $c_i = \Ta$ $\forall i \in \Pl$, $k_t = 3$ $\forall t \in \Ta$. If every agent is assigned a unique target in this situation, then the system is at an equilibrium and no agent has any incentive to unilaterally deviate since they cannot improve their respective payoff or the global system welfare. In such a situation $W_{NE} = 0$ and thus $PoA = W_{OPT} / W_{NE}^{bad}$ would be undefined (or infinite).
 
 In general, $W_{NE}^{bad} \not= 0$ when: for all actions in the valid action set, there must exist a target-$t$ such that it is either successfully assigned or is one agent away from being successfully assigned and an agent-$p$ exists that is not assigned to $t$ in the current action but has $t$ in it's target constraint set ($t \in c_p$, $a_p \not= t$).
@@ -496,8 +503,7 @@ If the property \eqref{eq:poa} holds for a given game then its PoA is bounded; $
 	\centering\caption{Bounds on PoA as $|\Pl|$ increases.}\label{fig:poa}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Price of Stability}
+\subsection{Price of Stability (PoS)}
 PoS for this game is always 1. To prove this, assume we start with an action $a^{OPT}$ which results in optimal global welfare $W_{OPT}$. I will prove that this action $a^{OPT}$ must also be NE$^{best}$. If a player decides to unilaterally deviate from $a^{OPT}$ to $a'$ then $U_i(a'_i, a'_{-i}) > U_i(a^{OPT}_i, a^{OPT}_{-i})$. This means that the target $a'_i$ must not have been optimally assigned for action $a^{OPT}$. It is easy to see that a player's utility can only be increased if they move between successfully assigned targets or from some target (not necessarily successfully assigned) to a successfully assigned target. This results in one of two scenarios, either target $a^{OPT}_i$ was successfully assigned before the switch and is no longer successfully assigned in action $a'$ or both targets $a^{OPT}_i$ and $a'_i$ are successfully assigned in $a'$. 
 
 If the first case is true then that means target $a'_i$ was successfully assigned in action $a'$ by the switch from player-$i$ but was not successfully assigned in action $a^{OPT}$ (this is the only way player-$i$ could receive a better payoff for deviating from $a^{OPT}$). This means the global welfare is reduced by 1 and increased by one when going from $a^{OPT}$ to $a'$ which means $a'$ is another optimal action and we can replace our starting action with this new one and continue this recursive argument.
