@@ -111,6 +111,7 @@
 \newcommand{\Th}{\mathcal{Z}} % (Extensive) Terminal History
 \newcommand{\Ta}{\mathcal{T}} % (Cooperative) Targets/Resources
 \newcommand{\Co}{\mathcal{C}} % (Cooperative) Player assignment constraints
+\newcommand{\We}{\mathcal{W}} % (All) Global Welfare Function
 
 % Squeeze whitespace
 \setlength{\parskip}{0pt}
@@ -143,49 +144,49 @@ Target assignment is a well studied problem in the fields of game theory and opt
 \section{Introduction}
 The problem of target assignment (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called Task Allocation or Task Assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of target assignment called the Multiple Integer Knapsack Problem. While each of these formulations have provided unique perspectives and results, we believe an interdisciplinary approach is essential for truly leveraging the advantages broth forth via these different formulations of the common TA problem.
 
-In this paper, we begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an integer linear program (ILP) which optimizes a desired welfare function. The constraints for the ILP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known computational complexity model (P-NP complexity) from computer science follows. Here, we show that since the TA problem can be set up as an ILP, it follows that the yes-no decision version of TA is an NP-complete problem (through reduction to 3-SAT), while the TA optimization problem is NP-hard. Subsequently, some of the TA problem constrains are relaxed and we discuss a centralized polynomial time greedy algorithm for solving TA under these relaxed constraints. 
+We begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an integer linear program (ILP) which optimizes a desired welfare function. The constraints for the ILP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known P-NP computational complexity model from computer science follows. Here, we show that since the TA problem can be set up as an ILP, it follows that the yes-no decision version of TA is an NP-complete problem (through reduction to 3-SAT), while the TA optimization problem is NP-hard. Subsequently, we show that relaxing just one of the TA problem constrains results in an obvious centralized polynomial time greedy solution. Since the goal of this paper is to discuss bounds on the performance of \emph{distributed} approaches for solving TA, we compare the relaxed TA centralized algorithm with an analogous decentralized solution on a swarm of individually simple robots. We then re-introduce previously removed constraints and describe the complexities involved in designing a distributed solution of the TA problem. A theoretical comparison between centralized vs. decentralized approaches is once again afforded to us using Price of Anarchy (PoA) and Price of Stability (PoS) analysis tools from game theory. Finally, these theoretical results are backed up by simulated and real robot experiments.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Related Work}
+\subsection{Related Work}
 Most recent work in distributed welfare games\cite{Marden2008, Marden2013} assumes that players are, in general, non-cooperative. While a similar formulation of the vehicle-target assignment problem has been studied by Arslan et al.\cite{Arslan2007}, the authors do not discuss the situation where targets have assignment thresholds as presented in this paper. As an aside, since target thresholds remove the submodularity property from welfare functions for this game, work on valid utility games by Vetta et al.\cite{Vetta2002} cannot be used in this circumstance and additional analysis must be done to predict bounds on Price of Anarchy and Stability (PoA/PoS).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Game Setup and Example}
-The cooperative game is set up as follows:
+\section{Problem Setup and Example}
+The TA problem is formally defined as follows:
 \begin{itemize}
-	\item Players: $\Pl = \{1,2,3,\ldots, N\}$.
-	\item Targets: $t \in \Ta$, $|\Ta| = M$.
-	\item Target Threshold: $k_t$, $t \in \Ta$.
-	\item Player Constraints: $c_i = S \subseteq \Ta$, $c_i \in C$.
-	\item Target Detection Probability: We assume all players can perfectly detect and assign themselves to targets within their constraints, $c_i$. Therefore detection probability for all targets is 1.
+	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
+	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
+	\item Target Threshold: $K:\Ta \to \mathbb{N}$\\
+	The number of agents required to successfully attempt task-$t_j$ is $= K(t_j)$, which is shortened to $k_j$ for brevity.
+	
+	\item Agent Constraints: $C:\Pl \to \hat{\Ta} \subseteq \Ta$\\
+	The set of constraints for agent-$n_i$ ($= C(n_i)$) is the subset of targets that this agent can reach. It is shortened to $c_i$ for brevity.
+	\item Target Assignments: $A:\Ta \to \hat{\Pl} \subseteq \Pl$\\
+	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity.\\
+	\textbf{Definition:} A target is considered ``successfully assigned'' when $|a_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
+	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a_j| = k_j$.
 	\item Target specific welfare function, 
 \begin{align}
-	W_t(|a|_t) & = \left\{
+	W(t_j, |a_j|) & = \left\{
 	\begin{array}{ll}
-		1 & |a|_t \geq k_t\\
+		w_j & |a_j| \geq k_j\\
 		0 & o/w
 	\end{array}\right.\label{eq:wf}
 \end{align}
 	\item Global welfare function,
 \begin{align}
-	W(a) = \sum\limits_{t \in \Ta} W_t(|a|_t)\label{eq:gwf}
+	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)\label{eq:gwf}
 \end{align}
 \end{itemize}
-We can clearly see that the welfare function, $W(|a|_t)$, is not submodular. The fact that the global welfare function is just an accumulator of ``successfully assigned'' targets does help with PoA/PoS analysis.
-
-\textbf{Definition:} A target is considered ``successfully assigned'' when $|a|_t \geq k_t$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.
-
-\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a|_t = k_t$.
 
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
 \begin{itemize}
-	\item Players: $\Pl = \{1,2,3,4\}$
+	\item Agent: $\Pl = \{1,2,3,4\}$
 	\item Targets: $t \in \Ta = \{a, b, c\}$
 	\item Target Threshold: $k_a = k_b = k_c = 2$
-	\item Target specific welfare function, $W_t(|a|_t)$, from \eqref{eq:wf}
-	\item Anonymous Global welfare function, $W(a) = \sum\limits_{t \in \Ta} W_t(|a|_t)$, from \eqref{eq:gwf}.
+	\item Agent Constraints: $c_1 = c_3 = \{a, b\}$ and $c_2 = c_4 = \{b, c\}$
 \end{itemize}
 \begin{figure}[!htb]
 	\centering\includegraphics[width=5.5cm]{assets/ex1.png}
@@ -484,6 +485,7 @@ In this example case it is clearly a better idea to use MC over SV when picking 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Price of Anarchy/Price of Stability Analysis}
+We can clearly see that the welfare function, $W(|a|_t)$, is not submodular.
 \subsection{Price of Anarchy (PoA)}
 PoA for this game is only defined under specific conditions for this vehicle-target assignment problem. The global welfare for the worst NE of the game can be $W_{NE}^{bad} = 0$, e.g. $|\Pl| = 3$, $|\Ta| = 3$, $c_i = \Ta$ $\forall i \in \Pl$, $k_t = 3$ $\forall t \in \Ta$. If every agent is assigned a unique target in this situation, then the system is at an equilibrium and no agent has any incentive to unilaterally deviate since they cannot improve their respective payoff or the global system welfare. In such a situation $W_{NE} = 0$ and thus $PoA = W_{OPT} / W_{NE}^{bad}$ would be undefined (or infinite).
 
