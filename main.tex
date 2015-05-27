@@ -87,7 +87,7 @@
 \newcommand{\mycomment}[1]
 {
 \refstepcounter{comcount}
-\smallskip\noindent\fbox{\parbox{\linewidth}{\emph{Comment \arabic{comcount}} : \small{#1}}} 
+\textcolor{red}{\textbf{\emph{\arabic{comcount}}: \small{#1}}}
 }
 
 % Math commands
@@ -142,16 +142,11 @@ Target assignment is a well studied problem in the fields of game theory and opt
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-The problem of target assignment (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called Task Allocation or Task Assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of target assignment called the Multiple Integer Knapsack Problem. While each of these formulations have provided unique perspectives and results, we believe an interdisciplinary approach is essential for truly leveraging the advantages broth forth via these different formulations of the common TA problem.
+The problem of target assignment (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called Task Allocation or Task Assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of target assignment called the Multiple Integer Knapsack Problem. While each of these formulations have provided unique perspectives and results, we believe an interdisciplinary approach is essential for truly leveraging the advantages brought forth via these different formulations of the common TA problem.
 
-
+\mycomment{Move the related work paragraph here. Elaborate on the examples in the previous section and add a concrete example here. Use DARS reference to introduce the firefighting example and stick with it for the rest of the paper.}
 
 We begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an integer linear program (ILP) which optimizes a desired welfare function. The constraints for the ILP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known P-NP computational complexity model from computer science follows. Here, we show that since the TA problem can be set up as an ILP, it follows that the yes-no decision version of TA is an NP-complete problem (through reduction to 3-SAT), while the TA optimization problem is NP-hard. Subsequently, we show that relaxing just one of the TA problem constrains results in an obvious centralized polynomial time greedy solution. Since the goal of this paper is to discuss bounds on the performance of \emph{distributed} approaches for solving TA, we compare the relaxed TA centralized algorithm with an analogous decentralized solution on a swarm of individually simple robots. We then re-introduce previously removed constraints and describe the complexities involved in designing a distributed solution of the TA problem. A theoretical comparison between centralized vs. decentralized approaches is once again afforded to us using Price of Anarchy (PoA) and Price of Stability (PoS) analysis tools from game theory. Finally, these theoretical results are backed up by simulated and real robot experiments.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Related Work}
-Most recent work in distributed welfare games\cite{Marden2008, Marden2013} assumes that players are, in general, non-cooperative. While a similar formulation of the vehicle-target assignment problem has been studied by Arslan et al.\cite{Arslan2007}, the authors do not discuss the situation where targets have assignment thresholds as presented in this paper. As an aside, since target thresholds remove the submodularity property from welfare functions for this game, work on valid utility games by Vetta et al.\cite{Vetta2002} cannot be used in this circumstance and additional analysis must be done to predict bounds on Price of Anarchy and Stability (PoA/PoS).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,12 +155,12 @@ The TA problem is formally defined as follows:
 \begin{itemize}
 	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
 	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
-	\item Target Threshold: $K:\Ta \to \mathbb{N}$\\
+	\item Target Threshold: $K:\Ta \to \mathbb{Z}^+$\\
 	The number of agents required to successfully attempt task-$t_j$ is $= K(t_j)$, which is shortened to $k_j$ for brevity.
 	
 	\item Agent Constraints: $C:\Pl \to \hat{\Ta} \subseteq \Ta$\\
 	The set of constraints for agent-$n_i$ ($= C(n_i)$) is the subset of targets that this agent can reach. It is shortened to $c_i$ for brevity.
-	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of elements $x_{ij}$ that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
+	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of 0-1 elements $x(n_i, t_j)$ or $x_{ij}$ for short, that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
 	\begin{equation}\label{eq:X}
 		X = \left(\begin{array}{ccc}
 			x_{11} & \ldots & x_{1|\Ta|}\\
@@ -174,20 +169,23 @@ The TA problem is formally defined as follows:
 		\end{array}\right)
 	\end{equation}
 	\item Target Assignments: $A:\Ta \to \hat{\Pl} \subseteq \Pl$\\
-	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity. From~\eqref{eq:X} we can define $|a_j| = \sum\limits_{i = 1}^{|\Pl|} x_{ij}$\\
+	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity. From~\eqref{eq:X} we can define
+\begin{equation}\label{eq:aj}
+	|a_j| = \sum\limits_{i = 1}^{|\Pl|} x_{ij}
+\end{equation}
 	\textbf{Definition:} A target is considered ``successfully assigned'' when $|a_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
 	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a_j| = k_j$.
 	\item Target specific welfare function,
-\begin{align}
+\begin{align}\label{eq:wf}
 	W(t_j, |a_j|) & = \left\{
 	\begin{array}{ll}
 		w_j & |a_j| \geq k_j\\
 		0 & o/w
-	\end{array}\right.\label{eq:wf}
+	\end{array}\right.
 \end{align}
 	\item Global welfare function,
-\begin{align}
-	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)\label{eq:gwf}
+\begin{align}\label{eq:gwf}
+	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
 \end{align}
 \end{itemize}
 Given this problem setup our goal is to generate an optimal assignment of agents to targets such that the global welfare is maximized while taking into account all agent constraints and target thresholds. Therefore the optimization problem looks something like, $\argmax{X} \We$ which is discussed in considerable detail in the next section.
@@ -206,305 +204,31 @@ The following example describes a cooperative game with target thresholds and pl
 	\centering\caption{A cooperative game with 4 players and 3 targets. Gray pegs indicate the target's minimum threshold value while the arrows depict player assignment constraints.}\label{fig:ex1}
 \end{figure}
 
-Global welfare values for this example are listed in Table \ref{tab:mcgw}. Note that these values depend only on the number of successfully assigned targets. 
-\begin{table}[!htb]
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{b}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & $2$ & $1$\\
-	\cline{2-3}
-	$b$ & $1$ & $1$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & $1$ & $2$\\
-	\cline{2-3}
-	$b$ & $1$ & $1$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,c$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & $1$ & $1$\\
-	\cline{2-3}
-	$b$ & $1$ & $1$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & $1$ & $1$\\
-	\cline{2-3}
-	$b$ & $1$ & $2$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,c$}
-	\end{tabular}
-	\centering\caption{Global welfare for the vehicle-target assignemt example scenario with target thresholds and player constraints.}\label{tab:mcgw}
-\end{table}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Optimization using Integer Linear Programming (ILP)}
+Using the problem formulation from the previous section we can pose the TA optimization problem as a 0-1 ILP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving ILPs. This also unfortunately means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm exists for finding such an optimal assignment. 
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Computational Complexity of the TA ILP problem}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{A Distributed Approach to solving TA}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Selecting Agent Utility Functions}
-We discuss the effects that choosing different utility functions has for this example scenario. We discuss two utility functions, marginal contribution and Shapley value utility, and apply log-linear learning to observe equilibria of the system under both utility design choices.
-
-\subsubsection{Marginal Contribution (MC) Utility}
-MC utility gives us two important and desirable properties for a good utility function, existence and efficiency of NE. NE existence is guaranteed because the chosen binary welfare function is anonymous and  depends only on the number of vehicles assigned to a target\cite{Monderer1996}. Given that the global objective function is just a counting function that counts the total number of successfully assigned targets, we can show that a maximum assignment is always an NE of the system as it results in maximum player payoffs (see proof in \textbf{Price of Stability} section). Player utility values using MC utility are listed in Table \ref{tab:mcUtil}.  
-
-\begin{table}[!htb]
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{b}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & \textcolor{blue}{$1,1,1,1$} & $1,1,0,0$\\
-	\cline{2-3}
-	$b$ & $0,0,0,0$ & \textcolor{red}{$1,0,0,1$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $1,0,1,0$ & \textcolor{blue}{$1,1,1,1$}\\
-	\cline{2-3}
-	& \textcolor{red}{$1,1,0,0$} & $0,1,0,1$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,c$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0,0,0,0$ & \textcolor{red}{$0,0,1,1$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0,0,0,0$} & $0,0,0,0$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0,1,1,0$} & $0,1,0,1$\\
-	\cline{2-3}
-	& $0,0,0,0$ & \textcolor{blue}{$1,1,1,1$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,c$}
-	\end{tabular}
-	\centering\caption{Player payoffs for the example scenario using Marginal Contribution utility.}\label{tab:mcUtil}
-\end{table}
-
-Averaging over 1000 runs of log-linear learning for 1000 iterations each and using temperature $T = 0.15$, the following stationary distribution is observed (Table \ref{tab:mcsd}).
-
-\begin{table}[!htb]
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{b}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & \textcolor{blue}{$0.343$} & $0.000$\\
-	\cline{2-3}
-	$b$ & $0.002$ & \textcolor{red}{$0.000$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0.001$ & \textcolor{blue}{$0.308$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.000$} & $0.000$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,c$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0.000$ & \textcolor{red}{$0.001$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.000$} & $0.000$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.000$} & $0.000$\\
-	\cline{2-3}
-	& $0.000$ & \textcolor{blue}{$0.345$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,c$}
-	\end{tabular}
-	\centering\caption{Stationary Distribution approximated using log-linear learning and MC utility.}\label{tab:mcsd}
-\end{table}
-
-As is evident from these results, applying log-linear learning using MC utility converges the system to perfect target assignment if a perfect assignment can be made. The NE in blue are all cases of perfect assignment while the equilibria in red are cases of successful assignment but do not maximize global welfare. We now look at what happens when Shapley value utility is used instead of MC for this game.
-
-\subsubsection{Shapley Value (SV) Utility}
-Using SV utility, each player's utility for selecting target, $t \in \Ta$, can be computed using the simplified equation,
-\begin{align}
-	U_i(t, a_{-i}) & = \left\{
-		\begin{array}{ll}	
-			1/|a|_t & |a|_t \geq k_t\\
-			0 & |a|_t < k_t
-		\end{array}\right.
+\begin{align}\label{eq:ilp}
+	\text{Maximize}\hspace{1cm} & \sum\limits_{t \in \Ta} W(t, |A(t)|) = \We\\
+	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
+	& \sum\limits_{t \in \Ta} x(n_i, t) \leq 1\notag\\
+	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
+	& 0 \leq x(n_i, t_j) \leq 1\notag
 \end{align}
 
-Player utility values are listed in Table \ref{tab:svUtil}. Once again, running log-linear learning with the same parameters as used for marginal contribution utility we see the following stationary distribution (Table \ref{tab:svsd}).
-\begin{table}[!htb]
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{b}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & \textcolor{blue}{$\frac{1}{2},\frac{1}{2},\frac{1}{2},\frac{1}{2}$} & $\frac{1}{2},0\frac{1}{2},0$\\
-	\cline{2-3}
-	$b$ & $\frac{1}{3},\frac{1}{3},0,\frac{1}{3}$ & \textcolor{red}{$\frac{1}{2},0,0,\frac{1}{2}$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $\frac{1}{2},0,\frac{1}{2},0$ & \textcolor{blue}{$\frac{1}{2},\frac{1}{2},\frac{1}{2},\frac{1}{2}$} \\
-	\cline{2-3}
-	& \textcolor{red}{$\frac{1}{2},\frac{1}{2},0,0$} & $0,\frac{1}{2},0\frac{1}{2}$ \\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,c$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0,\frac{1}{3},\frac{1}{3},\frac{1}{3}$ & \textcolor{red}{$0,0,\frac{1}{2},\frac{1}{2}$}\\
-	\cline{2-3}
-	& \textcolor{red}{$\frac{1}{4},\frac{1}{4},\frac{1}{4},\frac{1}{4}$} & $\frac{1}{3},0,\frac{1}{3},\frac{1}{3}$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0,\frac{1}{2},\frac{1}{2},0$} & $0,\frac{1}{2},0,\frac{1}{2}$\\
-	\cline{2-3}
-	& $\frac{1}{3},\frac{1}{3},\frac{1}{3},0$ & \textcolor{blue}{$\frac{1}{2},\frac{1}{2},\frac{1}{2},\frac{1}{2}$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,c$}
-	\end{tabular}
-	\centering\caption{Player payoffs using Shapley Value utility.}\label{tab:svUtil}
-\end{table}
-\begin{table}[!htb]
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{b}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	$a$ & \textcolor{blue}{$0.175$} & $0.004$\\
-	\cline{2-3}
-	$b$ & $0.055$ & \textcolor{red}{$0.005$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0.003$ & \textcolor{blue}{$0.159$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.004$} & $0.005$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$a,c$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& $0.057$ & \textcolor{red}{$0.002$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.266$} & $0.046$\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,b$}
-	\end{tabular}~
-	\centering\begin{tabular}{r|c|c|}
-	\multicolumn{1}{c}{}
-	& \multicolumn{1}{c}{$b$}
-	& \multicolumn{1}{c}{$c$}\\
-	\cline{2-3}
-	& \textcolor{red}{$0.005$} & $0.004$\\
-	\cline{2-3}
-	& $0.056$ & \textcolor{blue}{$0.154$}\\
-	\cline{2-3}
-	\multicolumn{1}{c}{}
-	& \multicolumn{2}{c}{$b,c$}
-	\end{tabular}
-	\centering\caption{Stationary Distribution approximated using log-linear learning and SV utility.}\label{tab:svsd}
-\end{table}
+The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 ILP since all $x_{ij}$ can only have the value $0$ or $1$.
 
-In this case, the worst NE has the highest likelihood of being chosen by log-linear learning. The case when all the agents are assigned to the same target ($b, b, b, b$) results in both, minimum player utility as well as the lowest global welfare but is still an equilibrium of the game. While one can argue that the ``good'' equilibria---with equal global welfare and player payoffs---are collectively more likely to occur compared to the one bad equilibrium, this is still a $\approx 2:1 ((.175 + .159 + .154) / .266)$ ratio.
+The reader may notice that the objective function in \eqref{eq:ilp} is not completely linear in $x_{ij}$. Particularly, $W(t, |a_t|)$ is only \emph{piecewise} linear in the $x_{ij}$ as seen by substituting the definition of $|a_j|$ from \eqref{eq:aj} in \eqref{eq:wf}. This does not pose a problem since it is clear from \eqref{eq:aj} that $|a_j| \in \mathbb{Z}^+$ and therefore cannot ever hold a value such that $W(t_j, |a_j|)$ is undefined, discontinuous, or non-linear.
 
-In this example case it is clearly a better idea to use MC over SV when picking an appropriate utility function for this system to do optimal target assignment.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Computational Complexity of the TA Optimization Problem}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{A Distributed Approach to solving TA Optimization}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance Bounds: Centralized vs.~Distributed Approaches}
