@@ -188,7 +188,7 @@ The TA problem is formally defined as follows:
 	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
 \end{align}
 \end{itemize}
-Given this problem setup our goal is to generate an optimal assignment of agents to targets such that the global welfare is maximized while taking into account all agent constraints and target thresholds. Therefore the optimization problem looks something like, $\argmax{X} \We$ which is discussed in considerable detail in the next section.
+Given this problem setup our goal is to maximize the number of successful assignments of agents to targets which in turn maximizes the global welfare while taking into account all agent constraints and target thresholds. Therefore the optimization problem looks something like, $\argmax{X} \We$ which is discussed in considerable detail in the next section.
 
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
 \begin{itemize}
@@ -218,7 +218,7 @@ Using the problem formulation from the previous section we can pose the TA optim
 
 The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 ILP since all $x_{ij}$ can only have the value $0$ or $1$.
 
-The reader may notice that the objective function in \eqref{eq:ilp} is not completely linear in $x_{ij}$. Particularly, $W(t, |a_t|)$ is only \emph{piecewise} linear in the $x_{ij}$ as seen by substituting the definition of $|a_j|$ from \eqref{eq:aj} in \eqref{eq:wf}. This does not pose a problem since it is clear from \eqref{eq:aj} that $|a_j| \in \mathbb{Z}^+$ and therefore cannot ever hold a value such that $W(t_j, |a_j|)$ is undefined, discontinuous, or non-linear.
+The reader may notice that the objective function in \eqref{eq:ilp} is not completely linear in $x_{ij}$. Particularly, $W(t, |a_t|)$ is only \emph{piecewise} linear in the $x_{ij}$ as seen by substituting the definition of $|a_j|$ from \eqref{eq:aj} in \eqref{eq:wf}. This does not pose a problem since it is clear from \eqref{eq:aj} that $|a_j| \in \mathbb{Z}^+$ and therefore cannot ever hold a value such that $W(t_j, |a_j|)$ is undefined or non-linear.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Computational Complexity of the TA Optimization Problem}
