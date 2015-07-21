@@ -137,11 +137,7 @@
 \maketitle
 
 \begin{abstract}
-Target assignment is a well studied problem in the fields of game theory, optimization, and computer science where a number of agents are assigned to a number of targets for maximum system welfare. For example, given a set of search/surveillance zones and a swarm of UAVs, this problem describes how the UAVs should be delegated to search zones so as to maximize some global welfare for the system. 
- 
-An extension of this problem is where each search zone require a minimum number of agents to be assigned to it to receive any payoff whatsoever. Another natural extension arises when certain agents cannot be assigned to specific search areas for a number of reasons such as fuel constraints, obstacles, environmental hazards, etc. We look at both these extensions and frame the problem of target threshold assignment with agent constraints as a communal welfare game and discuss distributed solutions to this problem.
-
-
+Target assignment is a well studied problem in the fields of game theory, optimization, and computer science where a number of agents are assigned to a number of targets for maximum system welfare. For example, given a set of search/surveillance zones and a swarm of UAVs, this problem describes how the UAVs should be delegated to search zones so as to maximize some global welfare for the system. An extension of this problem is where each search zone require a minimum number of agents to be assigned to it to receive any payoff whatsoever. Another natural extension arises when certain agents cannot be assigned to specific search areas for a number of reasons such as fuel constraints, obstacles, environmental hazards, etc. We look at both these extensions and frame the problem of target threshold assignment with agent constraints as a communal welfare game and discuss distributed solutions to this problem.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,7 +150,7 @@ We begin by setting up the TA problem using concise and well understood nomencla
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problem Setup and Example}
+\section{Problem Setup and Example}\label{sec:setup}
 The TA problem is formally defined as follows:
 \begin{itemize}
 	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
@@ -210,11 +206,14 @@ The following example describes a cooperative game with target thresholds and pl
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Comparing Centralized vs. Distributed Approaches to Target Assignment}
-In this section we present two approaches to solving the TA problem, one centralized and one distributed. 
+In this section we present two approaches to solving the TA problem, one centralized and one distributed. The advantages and drawbacks of both algorithms are discussed briefly here. A more in-depth comparative discussion including performance bounds analysis follows in section~\ref{sec:disc}.
 
 \subsection{Centralized Optimal Assignment}
-Using the problem formulation from the previous section we can pose the TA optimization problem as a 0-1 IP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving IPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm exists for finding such an optimal assignment. 
+Using the problem formulation from the previous section we can pose the TA optimization problem as a 0-1 IP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving IPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, as TA is a well studied problem in a number of different fields, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets, most existing computers can find TA solutions well within the physical movement time-frame of robots. 
 
+The major caveat for using a centralized algorithm is that the central controller is assumed to have perfect knowledge of the operational environment and model parameters for the task being accomplished. Since this information is almost always subject to the accuracy constraints of the sensors making on-field measurements as well as the accuracy of the underlying model whose parameters are being optimized, a centralized method is not always feasible. Nonetheless, we study the effects of using a centralized controller assuming perfect system information as a baseline---being the best possible performance a multi-agent system can achieve for TA.
+
+The IP constraints and objective to maximize are presented below using the terms defined in section~\ref{sec:setup}. 
 \begin{align}\label{eq:ilp}
 	\text{Maximize}\hspace{1cm} & \sum\limits_{t \in \Ta} W(t, |A(t)|) = \We\\
 	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
@@ -222,16 +221,41 @@ Using the problem formulation from the previous section we can pose the TA optim
 	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
 	& 0 \leq x(n_i, t_j) \leq 1\notag
 \end{align}
+The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 IP since all $x_{ij}$ can only have the value $0$ or $1$. There are a number of system level quantities required for solving Eq \eqref{eq:ilp}, as shown in Table~\ref{tab:ilpquants}.
 
-The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 IP since all $x_{ij}$ can only have the value $0$ or $1$.
+\begin{table}[!ht]
+\centering\begin{tabular}{|l|p{.65\textwidth}|}
+\hline
+\textbf{Quantity} & \textbf{Description}\\\hline
+Targets $\Ta$ & An indexed list of targets is required to match individual target thresholds and agent constraints with.\\\hline
+Target Thresholds $K$ & An indexed list of team-size thresholds required to successfully attempt each task. This quantity is often extremely difficult to accurately compute. The number of robots required to complete a task can vary drastically over time due to environmental parameters, agent capabilities, and the class of tasks being performed.\\\hline
+Player Constraints $C$ & An indexed list describing whether or not a particular agent can attempt a particular task. There can be a number of reasons such as an agent's on-board capabilities, path planning issues, and fuel/cost constraints that limit an agent's ability to reach or attempt a particular task. This quantity is, once again, difficult to accurately discern for a large swarm system as the internal state information for every single robot needs to either be available to the central controller or each agent must make a calculated guess as to whether or not it is capable to reaching and performing a particular task and communicate that guess back to the central controller.\\\hline 
+\end{tabular}
+\centering\caption{System level parameters required for solving Eq.\eqref{eq:ilp}}\label{tab:ilpquants}
+\end{table}
+
+Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed to the central controller in a timely fashion we can make the claim that the assignment returned by solving Eq \eqref{eq:ilp} will either be an optimal assignment or that no optimal assignment exists. Also assuming that computation and communication time between the central controller and individual agents is negligible compared to physical agent locomotion times, we can claim that this method is the fastest possible solution for TA in a multi-agent system measured as the rate of task completion.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Distributed Response Threshold Assignment}
+Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the following algorithm to control team-size dynamics at task sites. Each agent 
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Performance Bounds: Centralized vs.~Distributed Approaches}
+\section{Experiments}
+We use the Droplet swarm robot platform to perform experiments to study both, the centralized and distributed algorithms mentioned in the previous section.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion of Performance Bounds of Centralized vs.~Distributed Approaches}\label{ref:disc}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
