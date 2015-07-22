@@ -236,15 +236,30 @@ Player Constraints $C$ & An indexed list describing whether or not a particular 
 
 Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed to the central controller in a timely fashion we can make the claim that the assignment returned by solving Eq \eqref{eq:ilp} will either be an optimal assignment or that no optimal assignment exists. Also assuming that computation and communication time between the central controller and individual agents is negligible compared to physical agent locomotion times, we can claim that this method is the fastest possible solution for TA in a multi-agent system measured as the rate of task completion.
 
+\begin{figure}[!ht]
+\centering\includegraphics[width=.65\columnwidth]{assets/CentralController.png}
+\centering\caption{This flowchart describes the control flow for the central controller of the centralized optimal assignment method.}\label{fig:centralcontrol}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering\includegraphics[width=.65\columnwidth]{assets/AgentController.png}
+\centering\caption{This flowchart describes the control flow for the individual agent controller of the centralized optimal assignment method.}\label{fig:centralagentcontrol}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Distributed Response Threshold Assignment}
-Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the following algorithm to control team-size dynamics at task sites. Each agent 
+Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
 
+Each agent's probability to collaborate with the team sharing its target at a given instance of time is controlled by two agent level parameters, $\tau$ and $\theta$.
 
+\begin{figure}[!ht]
+\centering\includegraphics[width=.65\columnwidth]{assets/DistributedController.png}
+\centering\caption{This flowchart describes the control flow for an indiviaul agent's controller in the de-centralized response threshold based optimal assignment method.}\label{fig:distcontrol}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
-We use the Droplet swarm robot platform to perform experiments to study both, the centralized and distributed algorithms mentioned in the previous section.
+We use the Droplet swarm robot platform to perform experiments to study both the centralized and distributed approaches to TA mentioned in the previous section. 
 
 
 
@@ -255,7 +270,7 @@ We use the Droplet swarm robot platform to perform experiments to study both, th
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion of Performance Bounds of Centralized vs.~Distributed Approaches}\label{ref:disc}
+\section{Discussion of Performance Bounds on Centralized vs.~Distributed Approaches}\label{ref:disc}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
