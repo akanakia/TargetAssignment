@@ -103,14 +103,9 @@
 \newcommand{\PD}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\V}[1]{\mathbf{#1}}
 \newcommand{\ubar}[1]{\underline{#1}}
-\newcommand{\Ac}{\mathcal{A}} % (Bayesian) Action Profile
-\newcommand{\St}{\mathcal{S}} % (Bayesian/Extensive) State List, Strategy set
-\newcommand{\Pl}{\mathcal{N}} % (Extensive/Bayesian) Player List
-\newcommand{\Hi}{\mathcal{H}} % (Extensive) Game History
-\newcommand{\Pf}{\mathcal{P}} % (Extensive) Player Function
-\newcommand{\Th}{\mathcal{Z}} % (Extensive) Terminal History
-\newcommand{\Ta}{\mathcal{T}} % (Cooperative) Targets/Resources
-\newcommand{\Co}{\mathcal{C}} % (Cooperative) Player assignment constraints
+\newcommand{\Sig}{\mathcal{S}}  % Sigmoid function
+\newcommand{\Pl}{\mathcal{N}} % Player List
+\newcommand{\Ta}{\mathcal{T}} % Targets/Resources
 \newcommand{\We}{\mathcal{W}} % (All) Global Welfare Function
 
 % Squeeze whitespace
@@ -250,7 +245,13 @@ Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed
 \subsection{Distributed Response Threshold Assignment}
 Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
 
-Each agent's probability to collaborate with the team sharing its target at a given instance of time is controlled by two agent level parameters, $\tau$ and $\theta$.
+Each agent's probability to collaborate with the team sharing its target at a given instance of time is computed using the logistic sigmoid function and by two agent level parameters, $\tau$ and $\theta$.
+\begin{equation}\label{eq:sig}
+	\Sig(\tau, \theta, x) = \frac{1}{1 + e^{\theta(\tau - x)}} 
+\end{equation}
+$\tau$ is the average team size required to complete the given task at the target location as estimated by each individual robot using on-board sensory information and prior knowledge of the system. The $\theta$ parameter controls the allowed variance in the mean team size making it more likely for an agent to collaborate even if the measured team size, $x$, is far from the required team size, $\tau$. The relationship between $\tau$, $\theta$ and $x$ in Eq \eqref{eq:sig} imparts a continuous response threshold strategy in agents where $x$, the current team size at the target location, is the input stimulus and $\tau$ is the internal threshold for collaboration. When $x$ is $\geq \tau$ the probability to collaborate increases sharply based on the slope of $\Sig$ which, in turn, is controlled by $\theta$.
+
+
 
 \begin{figure}[!ht]
 \centering\includegraphics[width=.65\columnwidth]{assets/DistributedController.png}
