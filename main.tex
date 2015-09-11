@@ -124,7 +124,7 @@
 \renewcommand{\arraystretch}{1.2}
 \setlength{\droptitle}{-2cm}
 
-\title{Performance Bounds on Centralized and Distributed Target Assignment with Constraints}
+\title{Performance Bounds on Centralized and Distributed Task Allocation with Constraints}
 \author{Anshul Kanakia}
 \date{}
 
@@ -132,12 +132,12 @@
 \maketitle
 
 \begin{abstract}
-Target assignment is a well studied problem in the fields of game theory, optimization, and computer science where a number of agents are assigned to a number of targets for maximum system welfare. For example, given a set of search/surveillance zones and a swarm of UAVs, this problem describes how the UAVs should be delegated to search zones so as to maximize some global welfare for the system. An extension of this problem is where each search zone require a minimum number of agents to be assigned to it to receive any payoff whatsoever. Another natural extension arises when certain agents cannot be assigned to specific search areas for a number of reasons such as fuel constraints, obstacles, environmental hazards, etc. We look at both these extensions and frame the problem of target threshold assignment with agent constraints as a communal welfare game and discuss distributed solutions to this problem.
+Task allocation is a well studied problem in the fields of game theory, optimization, and computer science where a number of agents are assigned to a number of targets for maximum system welfare. For example, given a set of search/surveillance zones and a swarm of UAVs, this problem describes how the UAVs should be delegated to search zones so as to maximize some global welfare for the system. An extension of this problem is where each search zone require a minimum number of agents to be assigned to it to receive any payoff whatsoever. Another natural extension arises when certain agents cannot be assigned to specific search areas for a number of reasons such as fuel constraints, obstacles, environmental hazards, etc. We look at both these extensions and frame the problem of target threshold assignment with agent constraints as a communal welfare game and discuss distributed solutions to this problem.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-The problem of target assignment (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called Task Allocation or Task Assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of target assignment called the Multiple Integer Knapsack Problem. While each of these formulations have provided unique perspectives and results, we believe an interdisciplinary approach is essential for truly leveraging the advantages brought forth via these different formulations of the common TA problem. As such, we use a game theory based problem formulation as well as Integer Programming (IP) from the field of optimization to present the most straightforward centralized approach for TA of multiple agents to multiple tasks with constraints. We then use results from swarm robotics to present a distributed approach to the problem while discussing certain problem simplifications and real-world issues such as incomplete system knowledge and transfer of information from one agent to another.
+The problem of task allocation (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called Task Allocation or Task Assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of task allocation called the Multiple Integer Knapsack Problem. While each of these formulations have provided unique perspectives and results, we believe an interdisciplinary approach is essential for truly leveraging the advantages brought forth via these different formulations of the common TA problem. As such, we use a game theory based problem formulation as well as Integer Programming (IP) from the field of optimization to present the most straightforward centralized approach for TA of multiple agents to multiple tasks with constraints. We then use results from swarm robotics to present a distributed approach to the problem while discussing certain problem simplifications and real-world issues such as incomplete system knowledge and transfer of information from one agent to another.
 
 \mycomment{Move the related work paragraph here. Elaborate on the examples in the previous section and add a concrete example here. Use DARS reference to introduce the firefighting example and stick with it for the rest of the paper.}
 
@@ -229,7 +229,7 @@ Player Constraints $C$ & An indexed list describing whether or not a particular 
 \centering\caption{System level parameters required for solving Eq.\eqref{eq:ilp}}\label{tab:ilpquants}
 \end{table}
 
-Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed to the central controller in a timely fashion we can make the claim that the assignment returned by solving Eq \eqref{eq:ilp} will either be an optimal assignment or that no optimal assignment exists. Also assuming that computation and communication time between the central controller and individual agents is negligible compared to physical agent locomotion times, we can claim that this method is the fastest possible solution for TA in a multi-agent system measured as the rate of task completion.
+Assuming computation and communication time between the central controller and individual agents is negligible compared to physical agent locomotion times, we can claim that this method provides a baseline definition for optimal TA. The solution, if one exists, to the optimization problem defined by Eq.~\eqref{eq:ilp} is the agent assignment matrix $X$. Of course, the optimality of the solution is conditional upon accurate value for the quantities described in Table.~\ref{tab:ilpquants}. 
 
 \begin{figure}[!ht]
 \centering\includegraphics[width=.65\columnwidth]{assets/CentralController.png}
