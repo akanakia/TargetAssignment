@@ -1,0 +1,153 @@
+\documentclass[11pt, onecolumn, compsoc, letterpaper]{article}
+
+% Usual setup packages
+\usepackage{times}
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage[margin=2.75cm]{geometry} % to change the page dimensions
+\usepackage{graphicx} % General page control package
+\usepackage[compact]{titlesec} % For compact title
+\usepackage{listings} % For including source code with highlighting
+\usepackage{hyperref} % For better hyper-link integration
+
+% Packages for verbatim text blocks
+\usepackage{alltt} % Package for including math in verbatim text
+\usepackage{fancyvrb}
+
+% Packages for math symbols and other mathey things
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+% Packages for including pseudo-code
+\usepackage{algorithmicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% Packages that handle lists
+\usepackage{enumerate} % For reduced enumeration spacing
+%\usepackage{enumitem} % For suppressing bullets
+\usepackage{mdwlist} % Better control of lists
+
+% Packages that handle tables, figures and other floats
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{titling}
+\usepackage{float} % To make floats movable
+\usepackage[font=scriptsize,labelfont=bf]{caption}
+\usepackage[font=scriptsize,labelfont=bf]{subcaption}
+\usepackage{hhline}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[table]{xcolor}
+
+% Packages for drawing graphs, FSMs, etc.
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{shapes,arrows,calc,fit,positioning,shapes.symbols,shapes.callouts,patterns,automata}
+
+% clean up references
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+% smaller tab space
+\lstset{tabsize=4}
+
+%%% HEADERS & FOOTERS
+\usepackage{titlepic}
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+%\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+%\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+%\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+%\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+% Nice Little macro for adding a comment box. Includes incrementing comment numbers.
+\newcounter{comcount}
+\setcounter{comcount}{0}
+\newcommand{\mycomment}[1]
+{
+\refstepcounter{comcount}
+\textcolor{red}{\textbf{\emph{\arabic{comcount}}: \small{#1}}}
+}
+
+% Math commands
+\newcommand{\vnorm}[1]{\left|\left|#1\right|\right|}
+\newcommand{\tab}{\hspace*{2em}}
+\DeclareMathOperator*{\argminop}{arg\,min\,}
+\DeclareMathOperator*{\argmaxop}{arg\,max\,}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\argmin}[1]{\underset{#1}{\argminop}}
+\newcommand{\argmax}[1]{\underset{#1}{\argmaxop}}
+\newcommand{\D}[2]{\frac{d#1}{d#2}}
+\newcommand{\PD}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\V}[1]{\mathbf{#1}}
+\newcommand{\ubar}[1]{\underline{#1}}
+\newcommand{\Sig}{\mathcal{S}}  % Sigmoid function
+\newcommand{\Pl}{\mathcal{N}} % Player List
+\newcommand{\Ta}{\mathcal{T}} % Targets/Resources
+\newcommand{\We}{\mathcal{W}} % (All) Global Welfare Function
+
+% Squeeze whitespace
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+
+\titlespacing{\section}{0pt}{*3}{*3}
+\titlespacing{\subsection}{0pt}{*2}{*2}
+\titlespacing{\subsubsection}{0pt}{*1}{*1}
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\droptitle}{-2cm}
+
+\title{Performance Bounds on Centralized vs.~Distributed Task Allocation with Constraints}
+\author{Anshul Kanakia, Nikolaus Correll}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Task allocation is a well studied problem in the fields of robotics, optimization, and game theory where a number of identical agents must be assigned to the a number of collaborative tasks for maximum system welfare. Swarm robotics in particular has tackled this problem for a number of years and many centralized, distributed, and hybrid approaches exist for solving task allocation. Practical deployment of multi-agent systems for automated surveillance, robotic firefighting, and oil-spill containment among other tasks has been proposed as a viable alternative to existing approaches and corresponding task allocation strategies for each of these applications have been analyzed but there has so far been no formal unifying definition for optimal task allocation in swarm robotics. This paper therefore presents a formal problem definition for multi-agent task allocation as well as a general definition of optimal task allocation. A centralized approach is then compared as a baseline optimum to a proposed distributed task allocation method. The distributed method is an extension of existing work done using response threshold algorithms. While a centralized approach to task allocation is always optimal when provided with perfect information about the real-world system, in realistic scenarios involving agent and task constraints and imperfect sensing and communication we see that the distributed approach quickly attains a comparable level of performance and should be the preferred method of deployment due to the advantages it provides in reliability and robustness to agent level failure.
+\end{abstract}
+
+\section{Introduction}
+Task allocation (TA) is ubiquitous in different fields of research. In game theory, this problem is referred to as the Vehicle-Target Assignment problem. It is often called task allocation or task assignment in the field of robotics, specifically, swarm robotics and multi-agent systems. An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of task allocation called the multiple integer knapsack problem. Each of these formulations provides a unique perspective for studying the same problem and leveraging these different perspectives is essential for providing a generalized definition for TA. 
+
+
+
+\subsection{Related Work}
+
+\section{Problem Setup and Example}
+\section{Centralized vs.~Distributed Task Allocation}
+\subsection{Centralized Task Allocation Strategy}
+\subsection{Distributed Task Allocation Strategy}
+\subsection{Comparative Analysis}
+\section{Experiment Setup}
+\subsection{Centralized Task Allocation Experiments}
+\subsection{Distributed Task Allocation Experiments}
+\section{Results}
+\section{Analysis and Discussion}
+\section{Conclusion}
+
+\end{document}
