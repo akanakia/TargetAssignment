@@ -134,14 +134,14 @@ Task allocation is a well studied problem in the fields of robotics, optimizatio
 \section{Introduction}
 Task allocation (TA) is ubiquitous in different fields of research. It is often called task allocation or task assignment in the field of robotics, specifically, swarm robotics and multi-agent systems (MAS). An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of task allocation called the multiple integer knapsack problem. In game theory, this problem is referred to as the vehicle-target assignment problem. Each of these formulations provides a unique perspective for studying the same problem and leveraging these different perspectives is essential for providing a generalized definition for TA. 
 
-As pointed out in Gerkey 2004, while the research areas of MAS and TA have expanded considerably over the last decade most of the work on multi-agent task allocation (MATA) has focused mainly on very specific proof-of-concept examples of MATA system design. Even ten years later, current TA models are for scenarios such as foraging or surveillance or containment and service a niche in the domain. There is as yet no general model for MATA that can be used to globally define the problem. Gerkey 2004, provides an excellent starting point for this. The paper categorizes existing work in the field while also providing a utility based definition for MATA optimality but does not present a generalized MATA model. While Gerkey 2004 provides a taxonomy of existing MATA architectures, our goal with this paper is to provide a much more general low-level model for MATA and propose a definition of optimality that holds true under most specific TA scenarios. We do not provide a comparison of existing models in the field but instead attempt to situate our proposed general model for MATA as a valid framework that both existing and new  architectures can be molded to fit within. 
+As pointed out in \cite{gerkey2004formal}, while the research areas of MAS and TA have expanded considerably over the last decade most of the work on multi-agent task allocation (MATA) has focused mainly on very specific proof-of-concept examples of MATA system design. Even ten years later, current TA models are for scenarios such as foraging or surveillance or containment and service a niche in the domain. There is as yet no general model for MATA that can be used to globally define the problem. Gerkey et al.~\cite{gerkey2004formal}, provide an excellent starting point for this. The paper categorizes existing work in the field while also providing a utility based definition for MATA optimality but does not present a generalized MATA model. While Gerkey et al.~\cite{gerkey2004formal} provide a taxonomy of existing MATA architectures, our goal with this paper is to provide a much more general low-level model for MATA and propose a definition of optimality that holds true under most specific TA scenarios. We do not provide a comparison of existing models in the field but instead attempt to situate our proposed general model for MATA as a valid framework that both existing and new  architectures can be molded to fit within. 
 
 \subsection{Related Work}
 
 \section{Problem Definition and Example}
 TA is a canonical problem in swarm robotics. With the advent of more sophisticated general purpose robots such as the Baxter, NAO and innumerable UAVs the problem of handling real world tasks collaboratively, be it with other robots or humans, is becoming increasingly important. Many group tasks exhibit a property of concurrent benefit, i.e. single agent attempts to complete the task are guaranteed to fail or waste resources but groups attempting the task together provide a considerable concurrency benefit. A problem oft ignored by MATA model developers is deciding when a group is capable enough to attempt the collaborative task and whether or not simultaneous actions are important to complete the task successfully. While this precise temporal component of attempting tasks concurrently is not the focus of our work, it is important to point out as we make certain assumptions on required task group sizes and how these requirements change with time. In this context TA is distilled down to the process of assigning the required number of agents to particular dynamic tasks without worrying about how agents get to the tasks or what the exact dynamics of agents and these genericized tasks are. 
 
-We assume that tasks require at least two agents to attempt collaboratively. The major caveat here is that the \emph{exact} number of agents required to attempt a task is unknown and very difficult to accurately discern. Tasks with concurrent benefit share the property that the probability of success depends non-linearly on the collective capabilities and team size of the robots attempting it. In addition, the exact number of agents required to successfully complete the task varies over time due to numerous  complex physical parameters. Many collaborative tasks---particularly those seen in biological systems---exhibit the property of concurrent benefit, ranging from surveillance and coordinated defense of enclosed areas like termite mounds and honey bee hives \cite{Breed1990} to collective transport of heavy objects and even containment of oil spills and forest fires. To contain a large fire, it is insufficient (and inefficient) for a single agent to start putting out the fire without waiting for backup. But the rate of fire containment increases quickly by adding just a few more agents to the group, which illustrates the property of concurrent benefit well.
+We assume that tasks require at least two agents to attempt collaboratively. The major caveat here is that the \emph{exact} number of agents required to attempt a task is unknown and very difficult to accurately discern. Tasks with concurrent benefit share the property that the probability of success depends non-linearly on the collective capabilities and team size of the robots attempting it. In addition, the exact number of agents required to successfully complete the task varies over time due to numerous  complex physical parameters. Many collaborative tasks---particularly those seen in biological systems---exhibit the property of concurrent benefit, ranging from surveillance and coordinated defense of enclosed areas like termite mounds and honey bee hives \cite{breed1990division} to collective transport of heavy objects and even containment of oil spills and forest fires. To contain a large fire, it is insufficient (and inefficient) for a single agent to start putting out the fire without waiting for backup. But the rate of fire containment increases quickly by adding just a few more agents to the group, which illustrates the property of concurrent benefit well.
 
 \subsection{Multi-Agent Task Allocation Model}
 With this general overview of MATA in mind, we present the following formal model for TA.
@@ -176,12 +176,18 @@ With this general overview of MATA in mind, we present the following formal mode
 		0 & o/w
 	\end{array}\right.
 \end{align}
+where $w_j$ can be a value or function defining the utility of completing task-$t_j$ upon successful assignment.
+
 	\item Global welfare function,
 \begin{align}\label{eq:gwf}
 	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
 \end{align}
 \end{itemize}
-Given this problem setup our goal is to maximize the number of successful assignments of targets which in turn maximizes the global welfare while taking into account all agent constraints and target thresholds.
+
+Eqn.~\eqref{eq:gwf} is an objective function that can be maximized to provide an \emph{optimal} assignment of agents to targets. This is in contrast to a lot of existing approaches for MATA where each agent is concerned with maximizing their own utility, making such approaches agent-centric. We, instead, focus on the task as the primary entity for which a utility function is defined and maximized. This approach falls more in line with work such as \cite{shehory1998methods}.
+
+\subsection{Defining Optimality for Multi-Agent Task Allocation}
+
 
 \subsection{Example}
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
@@ -208,5 +214,8 @@ The following example describes a cooperative game with target thresholds and pl
 \section{Results}
 \section{Analysis and Discussion}
 \section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}
